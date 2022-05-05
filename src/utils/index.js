@@ -26,6 +26,16 @@ const mapDBToModel2 = ({
     genre,
     duration,
     albumId,
-    });    
+    });
     
-  module.exports = { mapDBToModel, mapDBToModel2 };
+const mapDBToModel3 = ({
+      id,
+      name,
+      username,
+    }) => ({
+      id,
+      name,
+      username,
+      });
+    
+  module.exports = { mapDBToModel, mapDBToModel2, mapDBToModel3 };
