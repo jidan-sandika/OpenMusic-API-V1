@@ -4,18 +4,21 @@ const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
 const TokenManager = require('./tokenize/TokenManager');
 
+// plugins
 const albums = require('./api/albums');
 const songs = require('./api/songs');
 const users = require('./api/users');
 const authentications = require('./api/authentications');
 const playlists = require('./api/playlists');
 
+// services
 const AlbumsService = require('./services/postgres/AlbumsService');
 const SongsService = require('./services/postgres/SongsService');
 const UsersService = require('./services/postgres/UsersService');
 const AuthenticationsService = require('./services/postgres/AuthenticationsService');
 const PlaylistsService = require('./services/postgres/PlaylistsService');
 
+// validators
 const AlbumsValidator = require('./validator/albums');
 const SongsValidator = require('./validator/songs');
 const UsersValidator = require('./validator/users');
@@ -23,6 +26,7 @@ const AuthenticationsValidator = require('./validator/authentications');
 const PlaylistsValidator = require('./validator/playlists');
 
 const init = async () => {
+  
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
   const usersService = new UsersService();
@@ -63,7 +67,7 @@ const init = async () => {
     }),
   });
 
-  let plugins = [{
+  const plugins = [{
       plugin: albums,
       options: {
         service: albumsService,
