@@ -54,15 +54,32 @@ class PlaylistsHandler {
     }
   }
 
-  async getPlaylistsHandler(request) {
-    const { id: credentialId } = request.auth.credentials;
-    const playlists = await this._service.getPlaylists(credentialId);
-    return {
-      status: 'success',
-      data: {
-        playlists,
-      },
-    };
+  async getPlaylistsHandler(request, h) {
+    try {
+      const { id: credentialId } = request.auth.credentials;
+      const playlists = await this._service.getPlaylists(credentialId);
+
+      return { 
+        status: 'success',
+        data: {
+          playlists,
+        },
+      };
+    } catch (error) {
+      if (error instanceof ClientError) {
+        return h.response({
+          status: 'fail',
+          message: error.message,
+        }).code(error.statusCode);
+      }
+      // server error
+      console.error(error);
+      return h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami',
+      }).code(500);
+    }
+
   }
 
   async deletePlaylistByIdHandler(request, h) {
@@ -105,7 +122,7 @@ class PlaylistsHandler {
       const { songId } = request.payload;
 
       this._validator.validateAddSongToPlaylistPayload(request.payload);
-      await this._service.verifyPlaylistOwner(playlist_id, credentialId);
+      await this._service.verifyPlaylistAccess(playlist_id, credentialId);
       await this._service.addSongToPlaylist( playlist_id, songId );
 
       const response = h.response({
@@ -140,7 +157,7 @@ class PlaylistsHandler {
       
       const { id: credentialId } = request.auth.credentials;
       const { id: playlist_id } = request.params;
-      await this._service.verifyPlaylistOwner(playlist_id, credentialId);
+      await this._service.verifyPlaylistAccess(playlist_id, credentialId);
   
       const playlist = await this._service.getSongInPlaylist(playlist_id);
       return {
@@ -179,7 +196,7 @@ class PlaylistsHandler {
       const { id: credentialId } = request.auth.credentials;
       const { songId } = request.payload;
       
-      await this._service.verifyPlaylistOwner(playlist_id, credentialId);
+      await this._service.verifyPlaylistAccess(playlist_id, credentialId);
       await this._service.deleteSongInPlaylist(playlist_id, songId);
 
       return {

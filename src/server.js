@@ -15,6 +15,7 @@ const playlists = require('./api/playlists');
 const _exports = require('./api/exports');
 const uploads = require('./api/uploads');
 const userAlbumLikes = require('./api/userAlbumLikes');
+const collaborations = require('./api/collaborations');
 
 // services
 const AlbumsService = require('./services/postgres/AlbumsService');
@@ -26,6 +27,7 @@ const ProducerService = require('./services/rabbitmq/ProducerService');
 const StorageService = require('./services/storage/StorageService');
 const UserAlbumLikesService = require('./services/postgres/UserAlbumLikesService');
 const CacheService = require('./services/redis/CacheService');
+const CollaborationsService = require('./services/postgres/CollaborationsService');
 
 // validators
 const AlbumsValidator = require('./validator/albums');
@@ -35,15 +37,17 @@ const AuthenticationsValidator = require('./validator/authentications');
 const PlaylistsValidator = require('./validator/playlists');
 const ExportsValidator = require('./validator/exports');
 const UploadsValidator = require('./validator/uploads');
+const CollaborationsValidator = require('./validator/collaborations');
 
 const init = async () => {
   
   const cacheService = new CacheService();
+  const collaborationsService = new CollaborationsService();
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
-  const playlistsService = new PlaylistsService();
+  const playlistsService = new PlaylistsService(collaborationsService);
   const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));
   const userAlbumLikesService = new UserAlbumLikesService(cacheService);
 
@@ -144,6 +148,14 @@ const init = async () => {
         albumsService,
       }
     },
+    {
+      plugin: collaborations,
+      options: {
+        service: collaborationsService,
+        validator: CollaborationsValidator,
+        playlistsService,
+      }
+    }
   ];
 
   await server.register(plugins);
