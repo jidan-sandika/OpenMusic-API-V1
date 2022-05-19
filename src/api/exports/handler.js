@@ -13,21 +13,23 @@ class ExportsHandler {
     try {
       this._validator.validateExportPlaylistPayload(request.payload);
 
-      const {id: credentialId} = request.auth.credentials;
-      const {playlistId} = request.params;
+      const { id: credentialId } = request.auth.credentials;
+      const { playlistId } = request.params;
+      const { targetEmail } = request.payload;
 
       await this._playlistService.verifyPlaylistOwner(playlistId, credentialId);
 
       const message = {
-        userId: request.auth.credentials.id,
+        userId: credentialId,
         playlistId,
-        targetEmail: request.payload.targetEmail,
+        targetEmail,
       };
+
       await this._service.sendMessage('export:playlists', JSON.stringify(message));
 
       const response = h.response({
         status: 'success',
-        message: 'Permintaan Anda sedang kami proses',
+        message: 'Permintaan Anda sedang diproses dalam antrian',
       });
       response.code(201);
       return response;
